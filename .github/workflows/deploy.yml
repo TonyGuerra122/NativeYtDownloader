@@ -21,12 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Instalar o vcpkg manualmente
+      # Instalar o vcpkg
       - name: Install vcpkg
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          ./vcpkg/bootstrap-vcpkg.sh # Linux/MacOS
-          ./vcpkg/bootstrap-vcpkg.bat # Windows
+          if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
+            git clone https://github.com/microsoft/vcpkg.git
+            ./vcpkg/bootstrap-vcpkg.bat
+          else
+            git clone https://github.com/microsoft/vcpkg.git
+            chmod +x ./vcpkg/bootstrap-vcpkg.sh
+            ./vcpkg/bootstrap-vcpkg.sh
         shell: bash
 
       # Instalar dependências do vcpkg
@@ -41,3 +45,7 @@ jobs:
       # Compilar o projeto
       - name: Build project
         run: cmake --build build --config Release
+
+      # Executar testes (opcional)
+      - name: Run tests
+        run: ctest --test-dir build
